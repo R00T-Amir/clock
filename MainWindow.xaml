@@ -5,10 +5,27 @@
         WindowStyle="None" AllowsTransparency="True" Background="Transparent"
         WindowStartupLocation="Manual"
         MouseLeftButtonDown="Window_MouseLeftButtonDown"
-        MouseRightButtonUp="Window_MouseRightButtonUp"
         Closing="Window_Closing">
     
-    <Border CornerRadius="15" Background="#CC1F1F1F" Margin="10">
+    <!-- منوی کلیک راست -->
+    <Window.ContextMenu>
+        <ContextMenu>
+            <MenuItem Header="Change Theme">
+                <MenuItem Header="Dark Mode" Click="Theme_Dark_Click"/>
+                <MenuItem Header="Light Mode" Click="Theme_Light_Click"/>
+                <MenuItem Header="Cyberpunk" Click="Theme_Cyber_Click"/>
+            </MenuItem>
+            <MenuItem Header="Opacity">
+                <MenuItem Header="100%" Click="Opacity_100_Click"/>
+                <MenuItem Header="80%" Click="Opacity_80_Click"/>
+                <MenuItem Header="50%" Click="Opacity_50_Click"/>
+            </MenuItem>
+            <Separator/>
+            <MenuItem Header="Exit" Click="Exit_Click"/>
+        </ContextMenu>
+    </Window.ContextMenu>
+
+    <Border x:Name="MainBorder" CornerRadius="15" Background="#CC1F1F1F" Margin="10">
         <Border.Effect>
             <DropShadowEffect BlurRadius="20" ShadowDepth="0" Opacity="0.5" Color="Black"/>
         </Border.Effect>
