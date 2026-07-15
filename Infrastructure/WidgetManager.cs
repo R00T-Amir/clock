@@ -26,7 +26,8 @@ namespace ChronoDesk.Infrastructure
             };
 
             BuildContextMenu();
-            Application.Current.Exit += (s, e) => Shutdown();
+            // رفع تداخل: مشخص کردن دقیق WPF Application
+            System.Windows.Application.Current.Exit += (s, e) => Shutdown();
         }
 
         private void BuildContextMenu()
@@ -51,7 +52,6 @@ namespace ChronoDesk.Infrastructure
         {
             if (!_settingsEngine.Settings.Widgets.Any())
             {
-                // اگر اولین بار است، یک ساعت محلی بساز
                 CreateWidget("Local", TimeZoneInfo.Local.Id);
             }
             else
@@ -103,7 +103,7 @@ namespace ChronoDesk.Infrastructure
             
             SaveAll();
             _notifyIcon.Visible = false;
-            Application.Current.Shutdown();
+            System.Windows.Application.Current.Shutdown();
         }
     }
 }
