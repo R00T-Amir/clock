@@ -5,22 +5,23 @@
         WindowStyle="None" AllowsTransparency="True" Background="Transparent"
         WindowStartupLocation="Manual"
         ShowInTaskbar="False"
+        FlowDirection="{Binding FlowDirection, Source={StaticResource Loc}}"
         MouseLeftButtonDown="Window_MouseLeftButtonDown">
     
     <Window.ContextMenu>
         <ContextMenu>
-            <MenuItem Header="Change Theme">
-                <MenuItem Header="Dark Mode" Click="Theme_Dark_Click"/>
-                <MenuItem Header="Light Mode" Click="Theme_Light_Click"/>
-                <MenuItem Header="Cyberpunk" Click="Theme_Cyber_Click"/>
+            <MenuItem Header="{Binding [ChangeTheme], Source={StaticResource Loc}}">
+                <MenuItem Header="{Binding [DarkMode], Source={StaticResource Loc}}" Click="Theme_Dark_Click"/>
+                <MenuItem Header="{Binding [LightMode], Source={StaticResource Loc}}" Click="Theme_Light_Click"/>
+                <MenuItem Header="{Binding [Cyberpunk], Source={StaticResource Loc}}" Click="Theme_Cyber_Click"/>
             </MenuItem>
-            <MenuItem Header="Opacity">
+            <MenuItem Header="{Binding [Opacity], Source={StaticResource Loc}}">
                 <MenuItem Header="100%" Click="Opacity_100_Click"/>
                 <MenuItem Header="80%" Click="Opacity_80_Click"/>
                 <MenuItem Header="50%" Click="Opacity_50_Click"/>
             </MenuItem>
             <Separator/>
-            <MenuItem Header="Close This Widget" Click="Exit_Click"/>
+            <MenuItem Header="{Binding [CloseWidget], Source={StaticResource Loc}}" Click="Exit_Click"/>
         </ContextMenu>
     </Window.ContextMenu>
 
