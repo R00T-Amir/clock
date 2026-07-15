@@ -35,10 +35,11 @@ namespace ChronoDesk
         private void ApplyAppearance()
         {
             this.Opacity = _config.Opacity;
-            MainBorder.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString(_config.BackgroundColor));
-            TimeText.Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString(_config.TextColor));
-            DateText.Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString(_config.DateColor));
-            CityText.Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString(_config.DateColor));
+            // رفع تداخل: مشخص کردن دقیق WPF Color
+            MainBorder.Background = new SolidColorBrush((System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString(_config.BackgroundColor));
+            TimeText.Foreground = new SolidColorBrush((System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString(_config.TextColor));
+            DateText.Foreground = new SolidColorBrush((System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString(_config.DateColor));
+            CityText.Foreground = new SolidColorBrush((System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString(_config.DateColor));
         }
 
         private void UpdateClock(object? sender, EventArgs e)
@@ -64,7 +65,6 @@ namespace ChronoDesk
 
         protected override void OnClosing(CancelEventArgs e)
         {
-            // ذخیره موقعیت این ویجت خاص هنگام بسته شدن
             _config.Left = this.Left;
             _config.Top = this.Top;
             base.OnClosing(e);
