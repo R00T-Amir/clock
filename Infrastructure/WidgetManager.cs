@@ -1,5 +1,8 @@
 using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Text.Json;
 using System.Windows;
 using ChronoDesk.Core;
 using Forms = System.Windows.Forms;
@@ -10,18 +13,22 @@ namespace ChronoDesk.Infrastructure
     {
         private readonly ISettingsEngine _settingsEngine;
         private readonly IServiceProvider _serviceProvider;
+        private readonly ILogger _logger;
         private readonly Forms.NotifyIcon _notifyIcon;
         private readonly LocalizationService _localizationService;
+        private List<CityData> _cities = new();
         private bool _isShuttingDown = false;
 
-        public WidgetManager(ISettingsEngine settingsEngine, IServiceProvider serviceProvider)
+        public WidgetManager(ISettingsEngine settingsEngine, IServiceProvider serviceProvider, ILogger logger)
         {
             _settingsEngine = settingsEngine;
             _serviceProvider = serviceProvider;
+            _logger = logger;
             
-            // گرفتن سرویس زبان از Resources
             _localizationService = (LocalizationService)System.Windows.Application.Current.FindResource("Loc");
-            _localizationService.LoadLanguage("en"); // زبان پیش‌فرض
+            _localizationService.LoadLanguage("en");
+
+            LoadCitiesDatabase();
 
             _notifyIcon = new Forms.NotifyIcon
             {
@@ -34,15 +41,35 @@ namespace ChronoDesk.Infrastructure
             System.Windows.Application.Current.Exit += (s, e) => Shutdown();
         }
 
+        private void LoadCitiesDatabase()
+        {
+            try
+            {
+                string path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "cities.json");
+                if (File.Exists(path))
+                {
+                    var json = File.ReadAllText(path);
+                    _cities = JsonSerializer.Deserialize<List<CityData>>(json) ?? new List<CityData>();
+                    _logger.LogInfo($"Loaded {_cities.Count} cities from database.");
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("Failed to load cities database", ex);
+            }
+        }
+
         private void BuildContextMenu()
         {
             var menu = new Forms.ContextMenuStrip();
 
             var addMenu = new Forms.ToolStripMenuItem(_localizationService["AddWidget"]);
-            addMenu.DropDownItems.Add("Tehran", null, (s, e) => CreateWidget("Tehran", "Iran Standard Time"));
-            addMenu.DropDownItems.Add("London", null, (s, e) => CreateWidget("London", "GMT Standard Time"));
-            addMenu.DropDownItems.Add("New York", null, (s, e) => CreateWidget("New York", "Eastern Standard Time"));
-            addMenu.DropDownItems.Add("Dubai", null, (s, e) => CreateWidget("Dubai", "Arabian Standard Time"));
+            
+            // ساخت منوی شهرها به صورت داینامیک از روی فایل JSON
+            foreach (var city in _cities)
+            {
+                addMenu.DropDownItems.Add(city.CityName, null, (s, e) => CreateWidget(city.CityName, city.TimeZoneId));
+            }
 
             var langMenu = new Forms.ToolStripMenuItem(_localizationService["Language"]);
             langMenu.DropDownItems.Add(_localizationService["English"], null, (s, e) => ChangeLanguage("en"));
@@ -60,8 +87,8 @@ namespace ChronoDesk.Infrastructure
         private void ChangeLanguage(string langCode)
         {
             _localizationService.LoadLanguage(langCode);
-            // بازسازی منو برای اعمال ترجمه‌های جدید
-            BuildContextMenu();
+            BuildContextMenu(); // بازسازی منو برای ترجمه
+            _logger.LogInfo($"Language changed to {langCode}");
         }
 
         public void Initialize()
@@ -81,6 +108,7 @@ namespace ChronoDesk.Infrastructure
 
         public void CreateWidget(string cityName, string timeZoneId)
         {
+            _logger.LogInfo($"Creating widget for {cityName}");
             var config = new WidgetConfig
             {
                 CityName = cityName,
@@ -100,7 +128,11 @@ namespace ChronoDesk.Infrastructure
             window.Show();
             window.Closed += (s, e) => 
             {
-                if (!_isShuttingDown) SaveAll();
+                if (!_isShuttingDown)
+                {
+                    _logger.LogInfo($"Widget closed: {config.CityName}");
+                    SaveAll();
+                }
             };
         }
 
@@ -111,9 +143,17 @@ namespace ChronoDesk.Infrastructure
             if (_isShuttingDown) return;
             _isShuttingDown = true;
             
+            _logger.LogInfo("Application shutdown initiated by user.");
             SaveAll();
             _notifyIcon.Visible = false;
             System.Windows.Application.Current.Shutdown();
         }
+    }
+
+    // مدل داده‌ای برای خواندن فایل cities.json
+    public class CityData
+    {
+        public string CityName { get; set; } = "";
+        public string TimeZoneId { get; set; } = "";
     }
 }
