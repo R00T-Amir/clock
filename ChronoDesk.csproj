@@ -8,7 +8,8 @@
     <UseWPF>true</UseWPF>
     <UseWindowsForms>true</UseWindowsForms>
     <ApplicationManifest>app.manifest</ApplicationManifest>
-    <AssemblyName>ChronoDesk</AssemblyName>
+    <!-- تغییر نام فایل اجرایی به R00TCLOCK -->
+    <AssemblyName>R00TCLOCK</AssemblyName>
     <RootNamespace>ChronoDesk</RootNamespace>
     <NoWarn>CS8625</NoWarn>
   </PropertyGroup>
@@ -22,7 +23,6 @@
     <None Update="Localization\*.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <!-- کپی کردن دیتابیس شهرها -->
     <None Update="cities.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
