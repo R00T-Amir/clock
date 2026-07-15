@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using System.Windows;
+using System.Drawing; // رفع خطای SystemIcons
 using ChronoDesk.Core;
 using Forms = System.Windows.Forms;
 
@@ -20,13 +21,12 @@ namespace ChronoDesk.Infrastructure
 
             _notifyIcon = new Forms.NotifyIcon
             {
-                Icon = System.Drawing.SystemIcons.Clock,
+                Icon = SystemIcons.Clock,
                 Visible = true,
                 Text = "ChronoDesk Pro"
             };
 
             BuildContextMenu();
-            // رفع تداخل: مشخص کردن دقیق WPF Application
             System.Windows.Application.Current.Exit += (s, e) => Shutdown();
         }
 
