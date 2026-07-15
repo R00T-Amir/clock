@@ -16,7 +16,7 @@ namespace ChronoDesk
                 .ConfigureServices((context, services) =>
                 {
                     services.AddSingleton<ITimeEngine, TimeEngine>();
-                    services.AddSingleton<ISettingsEngine, SettingsEngine>(); // اضافه شدن موتور تنظیمات
+                    services.AddSingleton<ISettingsEngine, SettingsEngine>();
                     services.AddSingleton<MainWindow>();
                 })
                 .Build();
@@ -31,7 +31,6 @@ namespace ChronoDesk
             var timeEngine = _host.Services.GetRequiredService<ITimeEngine>();
             _ = timeEngine.SynchronizeAsync();
 
-            // بارگذاری تنظیمات قبل از نمایش پنجره
             var settingsEngine = _host.Services.GetRequiredService<ISettingsEngine>();
             settingsEngine.Load();
 
@@ -48,14 +47,6 @@ namespace ChronoDesk
 
         protected override async void OnExit(ExitEventArgs e)
         {
-            // ذخیره تنظیمات هنگام بستن برنامه
-            var settingsEngine = _host.Services.GetRequiredService<ISettingsEngine>();
-            var mainWindow = _host.Services.GetRequiredService<MainWindow>();
-            
-            settingsEngine.Settings.Left = mainWindow.Left;
-            settingsEngine.Settings.Top = mainWindow.Top;
-            settingsEngine.Save();
-
             await _host.StopAsync();
             _host.Dispose();
             base.OnExit(e);
