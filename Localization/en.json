@@ -9,5 +9,10 @@
   "SaveExit": "Save & Exit",
   "Language": "Language",
   "English": "English",
-  "Persian": "Persian"
+  "Persian": "Persian",
+  "Calendar": "Calendar",
+  "Gregorian": "Gregorian",
+  "Jalali": "Jalali (Persian)",
+  "Both": "Both",
+  "AutoStart": "Start with Windows"
 }
