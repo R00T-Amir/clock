@@ -30,19 +30,20 @@
         </ContextMenu>
     </Window.ContextMenu>
 
-    <Border x:Name="MainBorder" CornerRadius="15" Background="#CC1F1F1F" Margin="10">
+    <Border x:Name="MainBorder" CornerRadius="15" Background="#CC1F1F1F" Margin="10" Padding="10">
         <Border.Effect>
             <DropShadowEffect BlurRadius="20" ShadowDepth="0" Opacity="0.5" Color="Black"/>
         </Border.Effect>
         
         <Grid>
-            <!-- ۱. پنل ساعت دیجیتال -->
+            <!-- ۱. پنل ساعت دیجیتال (بهینه‌سازی شده برای فیت شدن) -->
             <StackPanel x:Name="DigitalPanel" VerticalAlignment="Center" HorizontalAlignment="Center">
-                <TextBlock x:Name="CityText" FontSize="10" Foreground="#99FFFFFF" HorizontalAlignment="Center" Margin="0,0,0,5" FontFamily="Segoe UI Variable Display"/>
-                <TextBlock x:Name="TimeText" FontSize="30" FontWeight="Bold" Foreground="White" 
+                <TextBlock x:Name="CityText" FontSize="11" Foreground="#99FFFFFF" HorizontalAlignment="Center" Margin="0,0,0,5" FontFamily="Segoe UI Variable Display" TextTrimming="CharacterEllipsis"/>
+                <TextBlock x:Name="TimeText" FontSize="28" FontWeight="Bold" Foreground="White" 
                            HorizontalAlignment="Center" FontFamily="Segoe UI Variable Display"/>
-                <TextBlock x:Name="DateText" FontSize="12" Foreground="#99FFFFFF" 
-                           HorizontalAlignment="Center" Margin="0,5,0,0" FontFamily="Segoe UI Variable Display"/>
+                <TextBlock x:Name="DateText" FontSize="10" Foreground="#99FFFFFF" 
+                           HorizontalAlignment="Center" Margin="0,5,0,0" FontFamily="Segoe UI Variable Display" 
+                           TextTrimming="CharacterEllipsis" TextWrapping="NoWrap"/>
             </StackPanel>
 
             <!-- ۲. پنل ساعت LED -->
@@ -52,7 +53,6 @@
                     <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
                 
-                <!-- متن ساعت با افکت نورانی LED -->
                 <TextBlock x:Name="LEDTimeText" Grid.Row="0" Text="00:00:00" FontSize="54" FontWeight="Bold" 
                            FontFamily="Consolas" Foreground="#FFFF0000" 
                            HorizontalAlignment="Center" VerticalAlignment="Center">
