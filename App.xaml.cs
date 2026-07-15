@@ -3,7 +3,7 @@ using ChronoDesk.Core;
 using ChronoDesk.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Application = System.Windows.Application; // رفع تداخل نام
+using Application = System.Windows.Application;
 
 namespace ChronoDesk
 {
@@ -16,6 +16,7 @@ namespace ChronoDesk
             _host = Host.CreateDefaultBuilder()
                 .ConfigureServices((context, services) =>
                 {
+                    services.AddSingleton<ILogger, FileLogger>(); // اضافه شدن لاگر
                     services.AddSingleton<ITimeEngine, TimeEngine>();
                     services.AddSingleton<ISettingsEngine, SettingsEngine>();
                     services.AddSingleton<IWidgetManager, WidgetManager>();
@@ -28,6 +29,9 @@ namespace ChronoDesk
             this.DispatcherUnhandledException += App_DispatcherUnhandledException;
             
             await _host.StartAsync();
+
+            var logger = _host.Services.GetRequiredService<ILogger>();
+            logger.LogInfo("Application startup initiated.");
 
             var settingsEngine = _host.Services.GetRequiredService<ISettingsEngine>();
             settingsEngine.Load();
@@ -43,11 +47,16 @@ namespace ChronoDesk
 
         private void App_DispatcherUnhandledException(object sender, System.Windows.Threading.DispatcherUnhandledExceptionEventArgs e)
         {
+            var logger = _host.Services.GetRequiredService<ILogger>();
+            logger.LogError("Unhandled UI Exception", e.Exception);
             e.Handled = true;
         }
 
         protected override async void OnExit(ExitEventArgs e)
         {
+            var logger = _host.Services.GetRequiredService<ILogger>();
+            logger.LogInfo("Application shutting down.");
+
             await _host.StopAsync();
             _host.Dispose();
             base.OnExit(e);
