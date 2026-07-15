@@ -17,7 +17,7 @@ namespace ChronoDesk
                 {
                     services.AddSingleton<ITimeEngine, TimeEngine>();
                     services.AddSingleton<ISettingsEngine, SettingsEngine>();
-                    services.AddSingleton<MainWindow>();
+                    services.AddSingleton<IWidgetManager, WidgetManager>();
                 })
                 .Build();
         }
@@ -28,14 +28,15 @@ namespace ChronoDesk
             
             await _host.StartAsync();
 
-            var timeEngine = _host.Services.GetRequiredService<ITimeEngine>();
-            _ = timeEngine.SynchronizeAsync();
-
             var settingsEngine = _host.Services.GetRequiredService<ISettingsEngine>();
             settingsEngine.Load();
 
-            var mainWindow = _host.Services.GetRequiredService<MainWindow>();
-            mainWindow.Show();
+            var timeEngine = _host.Services.GetRequiredService<ITimeEngine>();
+            _ = timeEngine.SynchronizeAsync();
+
+            // اجرای موتور مدیریت ویجت‌ها (ساخت آیکون ترای و پنجره‌ها)
+            var widgetManager = _host.Services.GetRequiredService<IWidgetManager>();
+            widgetManager.Initialize();
 
             base.OnStartup(e);
         }
