@@ -9,13 +9,18 @@ namespace ChronoDesk
     public partial class MainWindow : Window
     {
         private readonly ITimeEngine _timeEngine;
+        private readonly ISettingsEngine _settingsEngine;
 
-        public MainWindow(ITimeEngine timeEngine)
+        public MainWindow(ITimeEngine timeEngine, ISettingsEngine settingsEngine)
         {
             InitializeComponent();
             _timeEngine = timeEngine;
+            _settingsEngine = settingsEngine;
 
-            // تایمر برای آپدیت UI (هر 500 میلی‌ثانیه برای دقت بالا)
+            // اعمال موقعیت ذخیره شده روی صفحه
+            this.Left = _settingsEngine.Settings.Left;
+            this.Top = _settingsEngine.Settings.Top;
+
             var timer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(500) };
             timer.Tick += UpdateClock;
             timer.Start();
@@ -25,19 +30,16 @@ namespace ChronoDesk
 
         private void UpdateClock(object? sender, EventArgs e)
         {
-            // دریافت زمان از موتور NTP
             var time = _timeEngine.GetCurrentTime().ToLocalTime();
             TimeText.Text = time.ToString("HH:mm:ss");
             DateText.Text = time.ToString("dddd, dd MMMM yyyy");
         }
 
-        // جابجایی پنجره با کشیدن ماوس
         private void Window_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             if (e.ButtonState == MouseButtonState.Pressed) DragMove();
         }
 
-        // بستن پنجره با کلیک راست
         private void Window_MouseRightButtonUp(object sender, MouseButtonEventArgs e)
         {
             this.Close();
