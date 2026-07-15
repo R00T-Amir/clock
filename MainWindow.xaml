@@ -4,6 +4,7 @@
         Title="ChronoDesk Pro" Height="150" Width="350"
         WindowStyle="None" AllowsTransparency="True" Background="Transparent"
         WindowStartupLocation="Manual"
+        ShowInTaskbar="False"
         MouseLeftButtonDown="Window_MouseLeftButtonDown">
     
     <Window.ContextMenu>
