@@ -25,6 +25,11 @@
                 <MenuItem Header="LED (Red)" Click="Mode_LED_Click"/>
                 <MenuItem Header="Analog" Click="Mode_Analog_Click"/>
             </MenuItem>
+            <MenuItem Header="{Binding [Calendar], Source={StaticResource Loc}}">
+                <MenuItem Header="{Binding [Gregorian], Source={StaticResource Loc}}" Click="Cal_Gregorian_Click"/>
+                <MenuItem Header="{Binding [Jalali], Source={StaticResource Loc}}" Click="Cal_Jalali_Click"/>
+                <MenuItem Header="{Binding [Both], Source={StaticResource Loc}}" Click="Cal_Both_Click"/>
+            </MenuItem>
             <Separator/>
             <MenuItem Header="{Binding [CloseWidget], Source={StaticResource Loc}}" Click="Exit_Click"/>
         </ContextMenu>
@@ -41,12 +46,17 @@
                 <TextBlock x:Name="CityText" FontSize="11" Foreground="#99FFFFFF" HorizontalAlignment="Center" Margin="0,0,0,5" FontFamily="Segoe UI Variable Display" TextTrimming="CharacterEllipsis"/>
                 <TextBlock x:Name="TimeText" FontSize="28" FontWeight="Bold" Foreground="White" 
                            HorizontalAlignment="Center" FontFamily="Segoe UI Variable Display"/>
+                
+                <!-- تاریخ‌های میلادی و جلالی -->
                 <TextBlock x:Name="DateText" FontSize="10" Foreground="#99FFFFFF" 
                            HorizontalAlignment="Center" Margin="0,5,0,0" FontFamily="Segoe UI Variable Display" 
                            TextTrimming="CharacterEllipsis" TextWrapping="NoWrap"/>
+                <TextBlock x:Name="JalaliDateText" FontSize="10" Foreground="#99FFFFFF" 
+                           HorizontalAlignment="Center" Margin="0,2,0,0" FontFamily="Segoe UI Variable Display" 
+                           TextTrimming="CharacterEllipsis" TextWrapping="NoWrap" Visibility="Collapsed"/>
             </StackPanel>
 
-            <!-- ۲. پنل ساعت LED (با Viewbox برای فیت شدن کامل) -->
+            <!-- ۲. پنل ساعت LED -->
             <Grid x:Name="LEDPanel" Visibility="Collapsed" Background="Black" Margin="0">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="*"/>
