@@ -20,8 +20,8 @@ namespace ChronoDesk.Infrastructure
 
             _notifyIcon = new Forms.NotifyIcon
             {
-                // رفع خطای SystemIcons: مشخص کردن دقیق مسیر
-                Icon = System.Drawing.SystemIcons.Clock,
+                // تغییر از Clock به Application (چون Clock در دات‌نت 8 وجود ندارد)
+                Icon = System.Drawing.SystemIcons.Application,
                 Visible = true,
                 Text = "ChronoDesk Pro"
             };
