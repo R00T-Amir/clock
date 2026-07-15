@@ -1,4 +1,5 @@
 using System;
+using System.ComponentModel;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Threading;
@@ -17,9 +18,16 @@ namespace ChronoDesk
             _timeEngine = timeEngine;
             _settingsEngine = settingsEngine;
 
-            // اعمال موقعیت ذخیره شده روی صفحه
-            this.Left = _settingsEngine.Settings.Left;
-            this.Top = _settingsEngine.Settings.Top;
+            // منطق هوشمند موقعیت‌یابی
+            if (_settingsEngine.Settings.Left == 100 && _settingsEngine.Settings.Top == 100)
+            {
+                this.WindowStartupLocation = WindowStartupLocation.CenterScreen;
+            }
+            else
+            {
+                this.Left = _settingsEngine.Settings.Left;
+                this.Top = _settingsEngine.Settings.Top;
+            }
 
             var timer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(500) };
             timer.Tick += UpdateClock;
@@ -43,6 +51,14 @@ namespace ChronoDesk
         private void Window_MouseRightButtonUp(object sender, MouseButtonEventArgs e)
         {
             this.Close();
+        }
+
+        // ذخیره دقیق موقعیت دقیقاً در لحظه بسته شدن پنجره
+        private void Window_Closing(object? sender, CancelEventArgs e)
+        {
+            _settingsEngine.Settings.Left = this.Left;
+            _settingsEngine.Settings.Top = this.Top;
+            _settingsEngine.Save();
         }
     }
 }
