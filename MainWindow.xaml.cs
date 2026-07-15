@@ -1,5 +1,6 @@
 using System;
 using System.ComponentModel;
+using System.Globalization;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Threading;
@@ -67,8 +68,8 @@ namespace ChronoDesk
             
             // تنظیم ابعاد دقیق برای هر حالت
             if (_config.ClockMode == "Analog") { this.Width = 200; this.Height = 200; }
-            else if (_config.ClockMode == "LED") { this.Width = 220; this.Height = 130; }
-            else { this.Width = 200; this.Height = 120; } // Digital اندازه فیت شده
+            else if (_config.ClockMode == "LED") { this.Width = 240; this.Height = 140; } // اندازه استاندارد برای LED
+            else { this.Width = 200; this.Height = 120; } // Digital
         }
 
         private void UpdateClock(object? sender, EventArgs e)
@@ -78,9 +79,10 @@ namespace ChronoDesk
                 var tz = TimeZoneInfo.FindSystemTimeZoneById(_config.TimeZoneId);
                 var time = TimeZoneInfo.ConvertTimeFromUtc(_timeEngine.GetCurrentTime(), tz);
 
-                TimeText.Text = time.ToString("HH:mm:ss");
-                DateText.Text = time.ToString("dddd, dd MMMM yyyy");
-                LEDTimeText.Text = time.ToString("HH:mm:ss");
+                // استفاده از InvariantCulture برای جلوگیری از مشکلات نمایش اعداد
+                TimeText.Text = time.ToString("HH:mm:ss", CultureInfo.InvariantCulture);
+                DateText.Text = time.ToString("dddd, dd MMMM yyyy", CultureInfo.InvariantCulture);
+                LEDTimeText.Text = time.ToString("HH:mm:ss", CultureInfo.InvariantCulture);
 
                 SecondRotation.Angle = time.Second * 6;
                 MinuteRotation.Angle = time.Minute * 6 + time.Second * 0.1;
@@ -89,8 +91,8 @@ namespace ChronoDesk
             catch
             {
                 var time = _timeEngine.GetCurrentTime().ToLocalTime();
-                TimeText.Text = time.ToString("HH:mm:ss");
-                LEDTimeText.Text = time.ToString("HH:mm:ss");
+                TimeText.Text = time.ToString("HH:mm:ss", CultureInfo.InvariantCulture);
+                LEDTimeText.Text = time.ToString("HH:mm:ss", CultureInfo.InvariantCulture);
             }
         }
 
