@@ -24,7 +24,7 @@ namespace ChronoDesk
             
             CityText.Text = _config.CityName;
             AnalogCityText.Text = _config.CityName;
-            LEDCityText.Text = _config.CityName.ToUpper(); // در ساعت‌های LED معمولاً حروف بزرگ است
+            LEDCityText.Text = _config.CityName.ToUpper();
             
             ApplyAppearance();
             ApplyClockMode();
@@ -45,8 +45,7 @@ namespace ChronoDesk
             CityText.Foreground = new Media.SolidColorBrush((Media.Color)Media.ColorConverter.ConvertFromString(_config.DateColor));
             AnalogCityText.Foreground = new Media.SolidColorBrush((Media.Color)Media.ColorConverter.ConvertFromString(_config.DateColor));
             
-            // مدیریت هوشمند رنگ LED بر اساس تم
-            if (_config.BackgroundColor == "#CCF0F0F0") // اگر تم روشن است
+            if (_config.BackgroundColor == "#CCF0F0F0")
             {
                 LEDPanel.Background = new Media.SolidColorBrush(Media.Colors.Black);
                 LEDTimeText.Foreground = new Media.SolidColorBrush(Media.Color.FromRgb(255, 0, 0));
@@ -66,10 +65,10 @@ namespace ChronoDesk
             AnalogPanel.Visibility = _config.ClockMode == "Analog" ? Visibility.Visible : Visibility.Collapsed;
             LEDPanel.Visibility = _config.ClockMode == "LED" ? Visibility.Visible : Visibility.Collapsed;
             
-            // تغییر اندازه پنجره بر اساس نوع ساعت
+            // تنظیم ابعاد دقیق برای هر حالت
             if (_config.ClockMode == "Analog") { this.Width = 200; this.Height = 200; }
             else if (_config.ClockMode == "LED") { this.Width = 220; this.Height = 130; }
-            else { this.Width = 220; this.Height = 150; } // Digital
+            else { this.Width = 200; this.Height = 120; } // Digital اندازه فیت شده
         }
 
         private void UpdateClock(object? sender, EventArgs e)
