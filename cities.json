@@ -1,0 +1,14 @@
+[
+  { "CityName": "Tehran", "TimeZoneId": "Iran Standard Time" },
+  { "CityName": "London", "TimeZoneId": "GMT Standard Time" },
+  { "CityName": "New York", "TimeZoneId": "Eastern Standard Time" },
+  { "CityName": "Los Angeles", "TimeZoneId": "Pacific Standard Time" },
+  { "CityName": "Dubai", "TimeZoneId": "Arabian Standard Time" },
+  { "CityName": "Tokyo", "TimeZoneId": "Tokyo Standard Time" },
+  { "CityName": "Sydney", "TimeZoneId": "AUS Eastern Standard Time" },
+  { "CityName": "Paris", "TimeZoneId": "Romance Standard Time" },
+  { "CityName": "Berlin", "TimeZoneId": "W. Europe Standard Time" },
+  { "CityName": "Istanbul", "TimeZoneId": "Turkey Standard Time" },
+  { "CityName": "Moscow", "TimeZoneId": "Russian Standard Time" },
+  { "CityName": "Beijing", "TimeZoneId": "China Standard Time" }
+]
