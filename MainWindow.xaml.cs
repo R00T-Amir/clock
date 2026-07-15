@@ -5,6 +5,7 @@ using System.Windows;
 using System.Windows.Input;
 using System.Windows.Threading;
 using ChronoDesk.Core;
+using ChronoDesk.Infrastructure;
 using Media = System.Windows.Media;
 
 namespace ChronoDesk
@@ -13,13 +14,18 @@ namespace ChronoDesk
     {
         private readonly ITimeEngine _timeEngine;
         private readonly WidgetConfig _config;
+        private readonly WidgetManager _manager;
         private readonly PersianCalendar _persianCalendar = new();
+        private bool _isDragging = false;
 
-        public MainWindow(ITimeEngine timeEngine, WidgetConfig config)
+        public WidgetConfig Config => _config;
+
+        public MainWindow(ITimeEngine timeEngine, WidgetConfig config, WidgetManager manager)
         {
             InitializeComponent();
             _timeEngine = timeEngine;
             _config = config;
+            _manager = manager;
 
             this.Left = _config.Left;
             this.Top = _config.Top;
@@ -76,20 +82,10 @@ namespace ChronoDesk
 
         private void ApplyCalendarMode()
         {
-            if (_config.ClockMode != "Digital") return; // تقویم فقط در دیجیتال نمایش داده می‌شود
-
-            if (_config.CalendarMode == "Gregorian")
-            {
-                JalaliDateText.Visibility = Visibility.Collapsed;
-            }
-            else if (_config.CalendarMode == "Jalali")
-            {
-                JalaliDateText.Visibility = Visibility.Collapsed; // متن اصلی را جلالی می‌کنیم
-            }
-            else if (_config.CalendarMode == "Both")
-            {
-                JalaliDateText.Visibility = Visibility.Visible;
-            }
+            if (_config.ClockMode != "Digital") return;
+            if (_config.CalendarMode == "Gregorian") JalaliDateText.Visibility = Visibility.Collapsed;
+            else if (_config.CalendarMode == "Jalali") JalaliDateText.Visibility = Visibility.Collapsed;
+            else if (_config.CalendarMode == "Both") JalaliDateText.Visibility = Visibility.Visible;
         }
 
         private void UpdateClock(object? sender, EventArgs e)
@@ -102,23 +98,12 @@ namespace ChronoDesk
                 TimeText.Text = time.ToString("HH:mm:ss", CultureInfo.InvariantCulture);
                 LEDTimeText.Text = time.ToString("HH:mm:ss", CultureInfo.InvariantCulture);
 
-                // منطق تقویم
                 string gregorianDate = time.ToString("dddd, dd MMMM yyyy", CultureInfo.InvariantCulture);
                 string jalaliDate = $"{_persianCalendar.GetYear(time)}/{_persianCalendar.GetMonth(time):00}/{_persianCalendar.GetDayOfMonth(time):00}";
 
-                if (_config.CalendarMode == "Jalali")
-                {
-                    DateText.Text = jalaliDate;
-                }
-                else if (_config.CalendarMode == "Both")
-                {
-                    DateText.Text = gregorianDate;
-                    JalaliDateText.Text = jalaliDate;
-                }
-                else // Gregorian
-                {
-                    DateText.Text = gregorianDate;
-                }
+                if (_config.CalendarMode == "Jalali") DateText.Text = jalaliDate;
+                else if (_config.CalendarMode == "Both") { DateText.Text = gregorianDate; JalaliDateText.Text = jalaliDate; }
+                else DateText.Text = gregorianDate;
 
                 SecondRotation.Angle = time.Second * 6;
                 MinuteRotation.Angle = time.Minute * 6 + time.Second * 0.1;
@@ -134,7 +119,58 @@ namespace ChronoDesk
 
         private void Window_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
-            if (e.ButtonState == MouseButtonState.Pressed) DragMove();
+            if (e.ButtonState == MouseButtonState.Pressed)
+            {
+                _isDragging = true;
+                DragMove();
+                _isDragging = false;
+                
+                // ذخیره موقعیت نهایی پس از رها کردن
+                _config.Left = this.Left;
+                _config.Top = this.Top;
+                _manager.SaveCurrentState();
+            }
+        }
+
+        // موتور چسبندگی مغناطیسی (Snapping)
+        protected override void OnLocationChanged(EventArgs e)
+        {
+            base.OnLocationChanged(e);
+            if (!_isDragging) return;
+
+            double threshold = 15.0;
+            double newLeft = this.Left;
+            double newTop = this.Top;
+            bool snapped = false;
+
+            // بررسی لبه‌های مانیتور
+            var screen = System.Windows.Forms.Screen.FromPoint(new System.Drawing.Point((int)this.Left, (int)this.Top)).WorkingArea;
+            
+            if (Math.Abs(this.Left - screen.Left) < threshold) { newLeft = screen.Left; snapped = true; }
+            if (Math.Abs(this.Top - screen.Top) < threshold) { newTop = screen.Top; snapped = true; }
+            if (Math.Abs((this.Left + this.Width) - screen.Right) < threshold) { newLeft = screen.Right - this.Width; snapped = true; }
+            if (Math.Abs((this.Top + this.Height) - screen.Bottom) < threshold) { newTop = screen.Bottom - this.Height; snapped = true; }
+
+            // بررسی برخورد با سایر ساعت‌ها
+            foreach (var win in _manager.GetActiveWindows())
+            {
+                if (win == this) continue;
+
+                // چسبیدن به سمت راست پنجره دیگر
+                if (Math.Abs(this.Left - (win.Left + win.Width)) < threshold && Math.Abs(this.Top - win.Top) < threshold) { newLeft = win.Left + win.Width; newTop = win.Top; snapped = true; }
+                // چسبیدن به سمت چپ پنجره دیگر
+                if (Math.Abs((this.Left + this.Width) - win.Left) < threshold && Math.Abs(this.Top - win.Top) < threshold) { newLeft = win.Left - this.Width; newTop = win.Top; snapped = true; }
+                // چسبیدن به سمت پایین پنجره دیگر
+                if (Math.Abs(this.Top - (win.Top + win.Height)) < threshold && Math.Abs(this.Left - win.Left) < threshold) { newTop = win.Top + win.Height; newLeft = win.Left; snapped = true; }
+                // چسبیدن به سمت بالا پنجره دیگر
+                if (Math.Abs((this.Top + this.Height) - win.Top) < threshold && Math.Abs(this.Left - win.Left) < threshold) { newTop = win.Top - this.Height; newLeft = win.Left; snapped = true; }
+            }
+
+            if (snapped)
+            {
+                this.Left = newLeft;
+                this.Top = newTop;
+            }
         }
 
         protected override void OnClosing(CancelEventArgs e)
