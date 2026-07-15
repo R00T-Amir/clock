@@ -12,12 +12,11 @@ namespace ChronoDesk
 
         public App()
         {
-            // راه‌اندازی Container تزریق وابستگی
             _host = Host.CreateDefaultBuilder()
                 .ConfigureServices((context, services) =>
                 {
-                    // ثبت سرویس‌ها
                     services.AddSingleton<ITimeEngine, TimeEngine>();
+                    services.AddSingleton<ISettingsEngine, SettingsEngine>(); // اضافه شدن موتور تنظیمات
                     services.AddSingleton<MainWindow>();
                 })
                 .Build();
@@ -25,16 +24,17 @@ namespace ChronoDesk
 
         protected override async void OnStartup(StartupEventArgs e)
         {
-            // مدیریت خطاهای بحرانی (Crash Protection)
             this.DispatcherUnhandledException += App_DispatcherUnhandledException;
             
             await _host.StartAsync();
 
-            // همگام‌سازی زمان در پس‌زمینه (Fire and Forget) تا استارتاپ زیر 1 ثانیه بماند
             var timeEngine = _host.Services.GetRequiredService<ITimeEngine>();
             _ = timeEngine.SynchronizeAsync();
 
-            // نمایش پنجره اصلی
+            // بارگذاری تنظیمات قبل از نمایش پنجره
+            var settingsEngine = _host.Services.GetRequiredService<ISettingsEngine>();
+            settingsEngine.Load();
+
             var mainWindow = _host.Services.GetRequiredService<MainWindow>();
             mainWindow.Show();
 
@@ -43,12 +43,19 @@ namespace ChronoDesk
 
         private void App_DispatcherUnhandledException(object sender, System.Windows.Threading.DispatcherUnhandledExceptionEventArgs e)
         {
-            // جلوگیری از کرش برنامه در صورت بروز خطاهای غیرمنتظره
             e.Handled = true;
         }
 
         protected override async void OnExit(ExitEventArgs e)
         {
+            // ذخیره تنظیمات هنگام بستن برنامه
+            var settingsEngine = _host.Services.GetRequiredService<ISettingsEngine>();
+            var mainWindow = _host.Services.GetRequiredService<MainWindow>();
+            
+            settingsEngine.Settings.Left = mainWindow.Left;
+            settingsEngine.Settings.Top = mainWindow.Top;
+            settingsEngine.Save();
+
             await _host.StopAsync();
             _host.Dispose();
             base.OnExit(e);
