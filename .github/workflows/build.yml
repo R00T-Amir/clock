@@ -11,10 +11,10 @@ jobs:
 
     steps:
     - name: Checkout Code
-      uses: actions/checkout@v4
+      uses: actions/checkout@v4  # ارتقا به v4
 
     - name: Setup .NET 8
-      uses: actions/setup-dotnet@v4
+      uses: actions/setup-dotnet@v4  # ارتقا به v4
       with:
         dotnet-version: 8.0.x
 
@@ -28,7 +28,7 @@ jobs:
       run: dotnet publish ChronoDesk.csproj -c Release -r win-x64 --self-contained false -o publish
 
     - name: Upload Build Artifact
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v4  # ارتقا به v4
       with:
         name: ChronoDesk-Pro-Installer
         path: publish/
