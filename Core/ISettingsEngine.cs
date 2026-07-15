@@ -22,10 +22,12 @@ namespace ChronoDesk.Core
         public string DateColor { get; set; } = "#99FFFFFF";
         public double Opacity { get; set; } = 1.0;
         public string ClockMode { get; set; } = "Digital";
+        public string CalendarMode { get; set; } = "Gregorian"; // Gregorian, Jalali, Both
     }
 
     public class AppSettings
     {
         public List<WidgetConfig> Widgets { get; set; } = new();
+        public bool AutoStart { get; set; } = false;
     }
 }
