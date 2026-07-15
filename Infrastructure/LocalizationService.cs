@@ -4,7 +4,6 @@ using System.ComponentModel;
 using System.IO;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
-using System.Windows;
 
 namespace ChronoDesk.Infrastructure
 {
@@ -15,17 +14,16 @@ namespace ChronoDesk.Infrastructure
 
         public string CurrentLanguage => _currentLanguage;
         
-        // جهت متن (راست‌چین برای فارسی، چپ‌چین برای انگلیسی)
-        public FlowDirection FlowDirection => _currentLanguage == "fa" ? FlowDirection.RightToLeft : FlowDirection.LeftToRight;
+        // رفع تداخل: مشخص کردن دقیق WPF FlowDirection
+        public System.Windows.FlowDirection FlowDirection => _currentLanguage == "fa" ? System.Windows.FlowDirection.RightToLeft : System.Windows.FlowDirection.LeftToRight;
 
-        // ایندکسر برای دسترسی به ترجمه‌ها در XAML
         public string this[string key]
         {
             get
             {
                 if (_translations.TryGetValue(key, out var value))
                     return value;
-                return key; // اگر کلید پیدا نشد، خود کلید را برمی‌گرداند
+                return key;
             }
         }
 
@@ -36,7 +34,7 @@ namespace ChronoDesk.Infrastructure
                 string path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Localization", $"{langCode}.json");
                 if (!File.Exists(path))
                 {
-                    langCode = "en"; // Fallback to English
+                    langCode = "en";
                     path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Localization", "en.json");
                 }
 
@@ -44,7 +42,6 @@ namespace ChronoDesk.Infrastructure
                 _translations = JsonSerializer.Deserialize<Dictionary<string, string>>(json) ?? new();
                 _currentLanguage = langCode;
                 
-                // اطلاع رسانی به UI برای آپدیت تمام متن‌ها و جهت صفحه
                 OnPropertyChanged("Item");
                 OnPropertyChanged(nameof(FlowDirection));
             }
