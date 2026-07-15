@@ -1,7 +1,6 @@
 using System;
 using System.Linq;
 using System.Windows;
-using System.Drawing; // رفع خطای SystemIcons
 using ChronoDesk.Core;
 using Forms = System.Windows.Forms;
 
@@ -21,7 +20,8 @@ namespace ChronoDesk.Infrastructure
 
             _notifyIcon = new Forms.NotifyIcon
             {
-                Icon = SystemIcons.Clock,
+                // رفع خطای SystemIcons: مشخص کردن دقیق مسیر
+                Icon = System.Drawing.SystemIcons.Clock,
                 Visible = true,
                 Text = "ChronoDesk Pro"
             };
