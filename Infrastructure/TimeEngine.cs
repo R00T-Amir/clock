@@ -1,5 +1,6 @@
 using System;
 using System.Diagnostics;
+using System.Net;
 using System.Net.Sockets;
 using System.Threading.Tasks;
 using ChronoDesk.Core;
@@ -23,7 +24,6 @@ namespace ChronoDesk.Infrastructure
         {
             lock (_lock)
             {
-                // محاسبه زمان سپری شده با تایمر سخت‌افزاری ویندوز
                 long elapsedTicks = Stopwatch.GetTimestamp() - _syncedStopwatchTicks;
                 double elapsedSeconds = (double)elapsedTicks / Stopwatch.Frequency;
                 return _syncedUtcTime.AddSeconds(elapsedSeconds);
@@ -32,14 +32,12 @@ namespace ChronoDesk.Infrastructure
 
         public async Task SynchronizeAsync()
         {
-            // لیست سرورهای معتبر طبق پرامپت
             string[] servers = { "time.google.com", "time.cloudflare.com", "pool.ntp.org", "time.windows.com" };
             
             foreach (var server in servers)
             {
                 if (await TryQueryNtp(server))
                 {
-                    // اگر همگام‌سازی با یک سرور موفق بود، نیازی به بقیه نیست
                     break; 
                 }
             }
@@ -49,31 +47,30 @@ namespace ChronoDesk.Infrastructure
         {
             try
             {
-                using var client = new UdpClient();
-                client.Client.ReceiveTimeout = 2000; // تایم‌اوت ۲ ثانیه
-                await client.ConnectAsync(server, 123);
+                // رفع خطای CS1929: دریافت IP سرور به جای اتصال مستقیم با نام دامنه
+                var addresses = await Dns.GetHostAddressesAsync(server);
+                if (addresses.Length == 0) return false;
                 
-                // بسته استاندارد NTP (48 بایت)
+                var endPoint = new IPEndPoint(addresses[0], 123);
+
+                using var client = new UdpClient();
+                client.Client.ReceiveTimeout = 2000; 
+                
                 var ntpData = new byte[48];
-                ntpData[0] = 0x1B; // لی = 3 (هشدار)، نسخه = 3، حالت = 3 (کلاینت)
+                ntpData[0] = 0x1B; 
                 
                 var pingStopwatch = Stopwatch.StartNew();
-                await client.SendAsync(ntpData, ntpData.Length);
                 
+                // ارسال مستقیم به EndPoint
+                await client.SendAsync(ntpData, ntpData.Length, endPoint);
                 var result = await client.ReceiveAsync();
                 pingStopwatch.Stop();
 
-                // استخراج Transmit Timestamp (بایت‌های 40 تا 47)
                 ulong intPart = ((ulong)result.Buffer[40] << 24) | ((ulong)result.Buffer[41] << 16) | ((ulong)result.Buffer[42] << 8) | result.Buffer[43];
                 ulong fractPart = ((ulong)result.Buffer[44] << 24) | ((ulong)result.Buffer[45] << 16) | ((ulong)result.Buffer[46] << 8) | result.Buffer[47];
 
-                // تبدیل به میلی‌ثانیه
                 var millis = (intPart * 1000) + ((fractPart * 1000) / 0x100000000L);
-                
-                // زمان NTP از 1 ژانویه 1900 شروع می‌شود
                 var networkTime = new DateTime(1900, 1, 1, 0, 0, 0, DateTimeKind.Utc).AddMilliseconds(millis);
-                
-                // تصحیح زمان بر اساس تاخیر شبکه (نصف زمان رفت و برگشت)
                 networkTime = networkTime.AddMilliseconds(-pingStopwatch.Elapsed.TotalMilliseconds / 2);
 
                 lock (_lock)
@@ -86,7 +83,6 @@ namespace ChronoDesk.Infrastructure
             }
             catch
             {
-                // در صورت قطعی اینترنت یا خرابی سرور، سرور بعدی امتحان می‌شود
                 return false; 
             }
         }
