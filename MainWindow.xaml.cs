@@ -2,9 +2,9 @@ using System;
 using System.ComponentModel;
 using System.Windows;
 using System.Windows.Input;
-using System.Windows.Media;
 using System.Windows.Threading;
 using ChronoDesk.Core;
+using Media = System.Windows.Media; // رفع تداخل Color و ColorConverter
 
 namespace ChronoDesk
 {
@@ -35,11 +35,11 @@ namespace ChronoDesk
         private void ApplyAppearance()
         {
             this.Opacity = _config.Opacity;
-            // رفع تداخل: مشخص کردن دقیق WPF Color
-            MainBorder.Background = new SolidColorBrush((System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString(_config.BackgroundColor));
-            TimeText.Foreground = new SolidColorBrush((System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString(_config.TextColor));
-            DateText.Foreground = new SolidColorBrush((System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString(_config.DateColor));
-            CityText.Foreground = new SolidColorBrush((System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString(_config.DateColor));
+            // استفاده از نام مستعار برای جلوگیری کامل از ابهام
+            MainBorder.Background = new Media.SolidColorBrush((Media.Color)Media.ColorConverter.ConvertFromString(_config.BackgroundColor));
+            TimeText.Foreground = new Media.SolidColorBrush((Media.Color)Media.ColorConverter.ConvertFromString(_config.TextColor));
+            DateText.Foreground = new Media.SolidColorBrush((Media.Color)Media.ColorConverter.ConvertFromString(_config.DateColor));
+            CityText.Foreground = new Media.SolidColorBrush((Media.Color)Media.ColorConverter.ConvertFromString(_config.DateColor));
         }
 
         private void UpdateClock(object? sender, EventArgs e)
