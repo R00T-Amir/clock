@@ -3,9 +3,10 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="ChronoDesk Pro" Height="150" Width="350"
         WindowStyle="None" AllowsTransparency="True" Background="Transparent"
-        WindowStartupLocation="CenterScreen"
+        WindowStartupLocation="Manual"
         MouseLeftButtonDown="Window_MouseLeftButtonDown"
-        MouseRightButtonUp="Window_MouseRightButtonUp">
+        MouseRightButtonUp="Window_MouseRightButtonUp"
+        Closing="Window_Closing">
     
     <Border CornerRadius="15" Background="#CC1F1F1F" Margin="10">
         <Border.Effect>
