@@ -12,7 +12,7 @@ namespace ChronoDesk.Infrastructure
         
         private static readonly string FilePath = Path.Combine(AppFolder, "settings.json");
 
-        public WidgetSettings Settings { get; private set; } = new WidgetSettings();
+        public AppSettings Settings { get; private set; } = new AppSettings();
 
         public void Load()
         {
@@ -21,16 +21,12 @@ namespace ChronoDesk.Infrastructure
                 if (File.Exists(FilePath))
                 {
                     var json = File.ReadAllText(FilePath);
-                    // دی‌سریالایز کردن تنظیمات
-                    Settings = JsonSerializer.Deserialize<WidgetSettings>(json) ?? new WidgetSettings();
+                    Settings = JsonSerializer.Deserialize<AppSettings>(json) ?? new AppSettings();
                 }
             }
             catch (Exception)
             {
-                // مکانیزم Self-Healing: در صورت خرابی فایل، تنظیمات پیش‌فرض بارگذاری می‌شود
-                Settings = new WidgetSettings();
-                
-                // پاک کردن فایل خراب برای جلوگیری از خطاهای بعدی
+                Settings = new AppSettings();
                 try { if (File.Exists(FilePath)) File.Delete(FilePath); } catch { }
             }
         }
@@ -43,10 +39,7 @@ namespace ChronoDesk.Infrastructure
                 var json = JsonSerializer.Serialize(Settings, new JsonSerializerOptions { WriteIndented = true });
                 File.WriteAllText(FilePath, json);
             }
-            catch (Exception)
-            {
-                // جلوگیری از کرش در صورت مشکل دسترسی به دیسک (مثلاً آنتی‌ویروس)
-            }
+            catch (Exception) { }
         }
     }
 }
