@@ -9,6 +9,8 @@
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <AssemblyName>ChronoDesk</AssemblyName>
     <RootNamespace>ChronoDesk</RootNamespace>
+    <!-- حذف هشدارهای nullable مربوط به کدهای خودکار WPF -->
+    <NoWarn>CS8625</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
