@@ -9,5 +9,10 @@
   "SaveExit": "ذخیره و خروج",
   "Language": "زبان",
   "English": "انگلیسی",
-  "Persian": "فارسی"
+  "Persian": "فارسی",
+  "Calendar": "تقویم",
+  "Gregorian": "میلادی",
+  "Jalali": "جلالی (شمسی)",
+  "Both": "هر دو",
+  "AutoStart": "اجرا با ویندوز"
 }
