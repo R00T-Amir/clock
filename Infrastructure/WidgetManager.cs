@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
@@ -35,13 +37,38 @@ namespace ChronoDesk.Infrastructure
 
             _notifyIcon = new Forms.NotifyIcon
             {
-                Icon = System.Drawing.SystemIcons.Application,
+                Icon = CreateRCIcon(), // تولید آیکون اختصاصی R و C
                 Visible = true,
-                Text = "ChronoDesk Pro"
+                Text = "R00T CLOCK" // تغییر نام برنامه
             };
 
             BuildContextMenu();
             System.Windows.Application.Current.Exit += (s, e) => Shutdown();
+        }
+
+        // موتور رسم آیکون R و C
+        private Icon CreateRCIcon()
+        {
+            using var bmp = new Bitmap(32, 32);
+            using var g = Graphics.FromImage(bmp);
+            g.SmoothingMode = SmoothingMode.AntiAlias;
+            g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAliasGridFit;
+            
+            // پس‌زمینه دایره‌ای تیره
+            using var bgBrush = new SolidBrush(Color.FromArgb(30, 30, 30));
+            g.FillEllipse(bgBrush, 2, 2, 28, 28);
+            
+            // رسم حرف R (آبی)
+            using var font = new Font("Arial", 12, FontStyle.Bold);
+            using var rBrush = new SolidBrush(Color.DeepSkyBlue);
+            g.DrawString("R", font, rBrush, 3, 7);
+            
+            // رسم حرف C (سفید)
+            using var cBrush = new SolidBrush(Color.White);
+            g.DrawString("C", font, cBrush, 15, 7);
+
+            var handle = bmp.GetHicon();
+            return Icon.FromHandle(handle);
         }
 
         public List<MainWindow> GetActiveWindows() => _activeWindows;
@@ -82,7 +109,6 @@ namespace ChronoDesk.Infrastructure
             langMenu.DropDownItems.Add(_localizationService["English"], null, (s, e) => ChangeLanguage("en"));
             langMenu.DropDownItems.Add(_localizationService["Persian"], null, (s, e) => ChangeLanguage("fa"));
 
-            // منوی پروفایل‌ها
             var profileMenu = new Forms.ToolStripMenuItem("Profiles");
             foreach (var profile in _settingsEngine.Settings.Profiles.Keys)
             {
@@ -111,37 +137,27 @@ namespace ChronoDesk.Infrastructure
 
         private void CreateNewProfile()
         {
-            // ساخت یک پروفایل جدید با نام خودکار
             string newname = $"Profile {_settingsEngine.Settings.Profiles.Count + 1}";
             SaveCurrentState();
             _settingsEngine.Settings.Profiles[newname] = new List<WidgetConfig>(_settingsEngine.Settings.Profiles[_settingsEngine.Settings.ActiveProfile]);
             _settingsEngine.Settings.ActiveProfile = newname;
             SaveAll();
             BuildContextMenu();
-            _logger.LogInfo($"Created new profile: {newname}");
         }
 
         private void SwitchProfile(string profileName)
         {
             if (profileName == _settingsEngine.Settings.ActiveProfile) return;
-            _logger.LogInfo($"Switching to profile: {profileName}");
-
-            // ذخیره پروفایل فعلی
             SaveCurrentState();
 
-            // بستن پنجره‌های فعلی
             _isShuttingDown = true;
             foreach (var win in _activeWindows.ToList()) win.Close();
             _activeWindows.Clear();
             _isShuttingDown = false;
 
-            // لود پروفایل جدید
             _settingsEngine.Settings.ActiveProfile = profileName;
             EnsureDefaultProfile();
-            foreach (var config in _settingsEngine.Settings.Profiles[profileName])
-            {
-                SpawnWindow(config);
-            }
+            foreach (var config in _settingsEngine.Settings.Profiles[profileName]) SpawnWindow(config);
             SaveAll();
             BuildContextMenu();
         }
@@ -155,8 +171,9 @@ namespace ChronoDesk.Infrastructure
                 using var key = Registry.CurrentUser.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Run", true);
                 if (key != null)
                 {
-                    if (_settingsEngine.Settings.AutoStart) key.SetValue("ChronoDesk", System.Windows.Application.ResourceAssembly.Location);
-                    else key.DeleteValue("ChronoDesk", false);
+                    // تغییر نام کلید رجیستری به R00TCLOCK
+                    if (_settingsEngine.Settings.AutoStart) key.SetValue("R00TCLOCK", System.Windows.Application.ResourceAssembly.Location);
+                    else key.DeleteValue("R00TCLOCK", false);
                 }
             }
             catch (Exception ex) { _logger.LogError("AutoStart error", ex); }
@@ -177,10 +194,7 @@ namespace ChronoDesk.Infrastructure
             }
             else
             {
-                foreach (var config in _settingsEngine.Settings.Profiles[_settingsEngine.Settings.ActiveProfile].ToList())
-                {
-                    SpawnWindow(config);
-                }
+                foreach (var config in _settingsEngine.Settings.Profiles[_settingsEngine.Settings.ActiveProfile].ToList()) SpawnWindow(config);
             }
         }
 
