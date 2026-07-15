@@ -3,6 +3,7 @@ using ChronoDesk.Core;
 using ChronoDesk.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Application = System.Windows.Application; // رفع تداخل نام
 
 namespace ChronoDesk
 {
@@ -34,7 +35,6 @@ namespace ChronoDesk
             var timeEngine = _host.Services.GetRequiredService<ITimeEngine>();
             _ = timeEngine.SynchronizeAsync();
 
-            // اجرای موتور مدیریت ویجت‌ها (ساخت آیکون ترای و پنجره‌ها)
             var widgetManager = _host.Services.GetRequiredService<IWidgetManager>();
             widgetManager.Initialize();
 
