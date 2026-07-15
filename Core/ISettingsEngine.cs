@@ -21,6 +21,7 @@ namespace ChronoDesk.Core
         public string TextColor { get; set; } = "#FFFFFF";
         public string DateColor { get; set; } = "#99FFFFFF";
         public double Opacity { get; set; } = 1.0;
+        public string ClockMode { get; set; } = "Digital";
     }
 
     public class AppSettings
