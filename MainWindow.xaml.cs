@@ -4,7 +4,7 @@ using System.Windows;
 using System.Windows.Input;
 using System.Windows.Threading;
 using ChronoDesk.Core;
-using Media = System.Windows.Media; // رفع تداخل Color و ColorConverter
+using Media = System.Windows.Media;
 
 namespace ChronoDesk
 {
@@ -23,7 +23,11 @@ namespace ChronoDesk
             this.Top = _config.Top;
             
             CityText.Text = _config.CityName;
+            AnalogCityText.Text = _config.CityName;
+            LEDCityText.Text = _config.CityName.ToUpper(); // در ساعت‌های LED معمولاً حروف بزرگ است
+            
             ApplyAppearance();
+            ApplyClockMode();
 
             var timer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(500) };
             timer.Tick += UpdateClock;
@@ -35,11 +39,37 @@ namespace ChronoDesk
         private void ApplyAppearance()
         {
             this.Opacity = _config.Opacity;
-            // استفاده از نام مستعار برای جلوگیری کامل از ابهام
             MainBorder.Background = new Media.SolidColorBrush((Media.Color)Media.ColorConverter.ConvertFromString(_config.BackgroundColor));
             TimeText.Foreground = new Media.SolidColorBrush((Media.Color)Media.ColorConverter.ConvertFromString(_config.TextColor));
             DateText.Foreground = new Media.SolidColorBrush((Media.Color)Media.ColorConverter.ConvertFromString(_config.DateColor));
             CityText.Foreground = new Media.SolidColorBrush((Media.Color)Media.ColorConverter.ConvertFromString(_config.DateColor));
+            AnalogCityText.Foreground = new Media.SolidColorBrush((Media.Color)Media.ColorConverter.ConvertFromString(_config.DateColor));
+            
+            // مدیریت هوشمند رنگ LED بر اساس تم
+            if (_config.BackgroundColor == "#CCF0F0F0") // اگر تم روشن است
+            {
+                LEDPanel.Background = new Media.SolidColorBrush(Media.Colors.Black);
+                LEDTimeText.Foreground = new Media.SolidColorBrush(Media.Color.FromRgb(255, 0, 0));
+                LEDCityText.Foreground = new Media.SolidColorBrush(Media.Color.FromRgb(102, 0, 0));
+            }
+            else
+            {
+                LEDPanel.Background = new Media.SolidColorBrush(Media.Colors.Black);
+                LEDTimeText.Foreground = new Media.SolidColorBrush(Media.Color.FromRgb(255, 0, 0));
+                LEDCityText.Foreground = new Media.SolidColorBrush(Media.Color.FromRgb(102, 0, 0));
+            }
+        }
+
+        private void ApplyClockMode()
+        {
+            DigitalPanel.Visibility = _config.ClockMode == "Digital" ? Visibility.Visible : Visibility.Collapsed;
+            AnalogPanel.Visibility = _config.ClockMode == "Analog" ? Visibility.Visible : Visibility.Collapsed;
+            LEDPanel.Visibility = _config.ClockMode == "LED" ? Visibility.Visible : Visibility.Collapsed;
+            
+            // تغییر اندازه پنجره بر اساس نوع ساعت
+            if (_config.ClockMode == "Analog") { this.Width = 200; this.Height = 200; }
+            else if (_config.ClockMode == "LED") { this.Width = 220; this.Height = 130; }
+            else { this.Width = 220; this.Height = 150; } // Digital
         }
 
         private void UpdateClock(object? sender, EventArgs e)
@@ -48,13 +78,20 @@ namespace ChronoDesk
             {
                 var tz = TimeZoneInfo.FindSystemTimeZoneById(_config.TimeZoneId);
                 var time = TimeZoneInfo.ConvertTimeFromUtc(_timeEngine.GetCurrentTime(), tz);
+
                 TimeText.Text = time.ToString("HH:mm:ss");
                 DateText.Text = time.ToString("dddd, dd MMMM yyyy");
+                LEDTimeText.Text = time.ToString("HH:mm:ss");
+
+                SecondRotation.Angle = time.Second * 6;
+                MinuteRotation.Angle = time.Minute * 6 + time.Second * 0.1;
+                HourRotation.Angle = (time.Hour % 12) * 30 + time.Minute * 0.5;
             }
             catch
             {
                 var time = _timeEngine.GetCurrentTime().ToLocalTime();
                 TimeText.Text = time.ToString("HH:mm:ss");
+                LEDTimeText.Text = time.ToString("HH:mm:ss");
             }
         }
 
@@ -69,6 +106,10 @@ namespace ChronoDesk
             _config.Top = this.Top;
             base.OnClosing(e);
         }
+
+        private void Mode_Digital_Click(object sender, RoutedEventArgs e) { _config.ClockMode = "Digital"; ApplyClockMode(); }
+        private void Mode_LED_Click(object sender, RoutedEventArgs e) { _config.ClockMode = "LED"; ApplyClockMode(); }
+        private void Mode_Analog_Click(object sender, RoutedEventArgs e) { _config.ClockMode = "Analog"; ApplyClockMode(); }
 
         private void Theme_Dark_Click(object sender, RoutedEventArgs e) => UpdateTheme("#CC1F1F1F", "#FFFFFF", "#99FFFFFF");
         private void Theme_Light_Click(object sender, RoutedEventArgs e) => UpdateTheme("#CCF0F0F0", "#1F1F1F", "#991F1F1F");
@@ -92,9 +133,6 @@ namespace ChronoDesk
             this.Opacity = opacity;
         }
 
-        private void Exit_Click(object sender, RoutedEventArgs e)
-        {
-            this.Close();
-        }
+        private void Exit_Click(object sender, RoutedEventArgs e) => this.Close();
     }
 }
