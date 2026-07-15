@@ -1,27 +1,57 @@
 using System.Windows;
+using ChronoDesk.Core;
+using ChronoDesk.Infrastructure;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 
 namespace ChronoDesk
 {
     public partial class App : Application
     {
-        protected override void OnStartup(StartupEventArgs e)
+        private readonly IHost _host;
+
+        public App()
         {
-            // Crash Protection: جلوگیری از بسته شدن ناگهانی برنامه
+            // راه‌اندازی Container تزریق وابستگی
+            _host = Host.CreateDefaultBuilder()
+                .ConfigureServices((context, services) =>
+                {
+                    // ثبت سرویس‌ها
+                    services.AddSingleton<ITimeEngine, TimeEngine>();
+                    services.AddSingleton<MainWindow>();
+                })
+                .Build();
+        }
+
+        protected override async void OnStartup(StartupEventArgs e)
+        {
+            // مدیریت خطاهای بحرانی (Crash Protection)
             this.DispatcherUnhandledException += App_DispatcherUnhandledException;
-            AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
             
+            await _host.StartAsync();
+
+            // همگام‌سازی زمان در پس‌زمینه (Fire and Forget) تا استارتاپ زیر 1 ثانیه بماند
+            var timeEngine = _host.Services.GetRequiredService<ITimeEngine>();
+            _ = timeEngine.SynchronizeAsync();
+
+            // نمایش پنجره اصلی
+            var mainWindow = _host.Services.GetRequiredService<MainWindow>();
+            mainWindow.Show();
+
             base.OnStartup(e);
         }
 
         private void App_DispatcherUnhandledException(object sender, System.Windows.Threading.DispatcherUnhandledExceptionEventArgs e)
         {
-            // در اینجا خطاها لاگ گرفته می‌شوند و برنامه کرش نمی‌کند
+            // جلوگیری از کرش برنامه در صورت بروز خطاهای غیرمنتظره
             e.Handled = true;
         }
 
-        private void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
+        protected override async void OnExit(ExitEventArgs e)
         {
-            // مدیریت خطاهای خارج از رابط کاربری
+            await _host.StopAsync();
+            _host.Dispose();
+            base.OnExit(e);
         }
     }
 }
