@@ -11,16 +11,20 @@ namespace ChronoDesk.Infrastructure
         private readonly ISettingsEngine _settingsEngine;
         private readonly IServiceProvider _serviceProvider;
         private readonly Forms.NotifyIcon _notifyIcon;
+        private readonly LocalizationService _localizationService;
         private bool _isShuttingDown = false;
 
         public WidgetManager(ISettingsEngine settingsEngine, IServiceProvider serviceProvider)
         {
             _settingsEngine = settingsEngine;
             _serviceProvider = serviceProvider;
+            
+            // گرفتن سرویس زبان از Resources
+            _localizationService = (LocalizationService)System.Windows.Application.Current.FindResource("Loc");
+            _localizationService.LoadLanguage("en"); // زبان پیش‌فرض
 
             _notifyIcon = new Forms.NotifyIcon
             {
-                // تغییر از Clock به Application (چون Clock در دات‌نت 8 وجود ندارد)
                 Icon = System.Drawing.SystemIcons.Application,
                 Visible = true,
                 Text = "ChronoDesk Pro"
@@ -34,18 +38,30 @@ namespace ChronoDesk.Infrastructure
         {
             var menu = new Forms.ContextMenuStrip();
 
-            var addMenu = new Forms.ToolStripMenuItem("Add Widget");
+            var addMenu = new Forms.ToolStripMenuItem(_localizationService["AddWidget"]);
             addMenu.DropDownItems.Add("Tehran", null, (s, e) => CreateWidget("Tehran", "Iran Standard Time"));
             addMenu.DropDownItems.Add("London", null, (s, e) => CreateWidget("London", "GMT Standard Time"));
             addMenu.DropDownItems.Add("New York", null, (s, e) => CreateWidget("New York", "Eastern Standard Time"));
             addMenu.DropDownItems.Add("Dubai", null, (s, e) => CreateWidget("Dubai", "Arabian Standard Time"));
 
+            var langMenu = new Forms.ToolStripMenuItem(_localizationService["Language"]);
+            langMenu.DropDownItems.Add(_localizationService["English"], null, (s, e) => ChangeLanguage("en"));
+            langMenu.DropDownItems.Add(_localizationService["Persian"], null, (s, e) => ChangeLanguage("fa"));
+
             menu.Items.Add(addMenu);
+            menu.Items.Add(langMenu);
             menu.Items.Add(new Forms.ToolStripSeparator());
-            menu.Items.Add("Save & Exit", null, (s, e) => Shutdown());
+            menu.Items.Add(_localizationService["SaveExit"], null, (s, e) => Shutdown());
 
             _notifyIcon.ContextMenuStrip = menu;
             _notifyIcon.DoubleClick += (s, e) => Shutdown();
+        }
+
+        private void ChangeLanguage(string langCode)
+        {
+            _localizationService.LoadLanguage(langCode);
+            // بازسازی منو برای اعمال ترجمه‌های جدید
+            BuildContextMenu();
         }
 
         public void Initialize()
@@ -84,17 +100,11 @@ namespace ChronoDesk.Infrastructure
             window.Show();
             window.Closed += (s, e) => 
             {
-                if (!_isShuttingDown)
-                {
-                    SaveAll();
-                }
+                if (!_isShuttingDown) SaveAll();
             };
         }
 
-        public void SaveAll()
-        {
-            _settingsEngine.Save();
-        }
+        public void SaveAll() => _settingsEngine.Save();
 
         public void Shutdown()
         {
