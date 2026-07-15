@@ -36,7 +36,7 @@
         </Border.Effect>
         
         <Grid>
-            <!-- ۱. پنل ساعت دیجیتال (بهینه‌سازی شده برای فیت شدن) -->
+            <!-- ۱. پنل ساعت دیجیتال -->
             <StackPanel x:Name="DigitalPanel" VerticalAlignment="Center" HorizontalAlignment="Center">
                 <TextBlock x:Name="CityText" FontSize="11" Foreground="#99FFFFFF" HorizontalAlignment="Center" Margin="0,0,0,5" FontFamily="Segoe UI Variable Display" TextTrimming="CharacterEllipsis"/>
                 <TextBlock x:Name="TimeText" FontSize="28" FontWeight="Bold" Foreground="White" 
@@ -46,20 +46,21 @@
                            TextTrimming="CharacterEllipsis" TextWrapping="NoWrap"/>
             </StackPanel>
 
-            <!-- ۲. پنل ساعت LED -->
-            <Grid x:Name="LEDPanel" Visibility="Collapsed" Background="Black" Margin="5">
+            <!-- ۲. پنل ساعت LED (با Viewbox برای فیت شدن کامل) -->
+            <Grid x:Name="LEDPanel" Visibility="Collapsed" Background="Black" Margin="0">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="*"/>
                     <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
                 
-                <TextBlock x:Name="LEDTimeText" Grid.Row="0" Text="00:00:00" FontSize="54" FontWeight="Bold" 
-                           FontFamily="Consolas" Foreground="#FFFF0000" 
-                           HorizontalAlignment="Center" VerticalAlignment="Center">
-                    <TextBlock.Effect>
-                        <DropShadowEffect BlurRadius="15" ShadowDepth="0" Opacity="1" Color="Red"/>
-                    </TextBlock.Effect>
-                </TextBlock>
+                <Viewbox Grid.Row="0" Stretch="Uniform" Margin="10,5,10,0" HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <TextBlock x:Name="LEDTimeText" Text="00:00:00" FontSize="60" FontWeight="Bold" 
+                               FontFamily="Consolas" Foreground="#FFFF0000">
+                        <TextBlock.Effect>
+                            <DropShadowEffect BlurRadius="15" ShadowDepth="0" Opacity="1" Color="Red"/>
+                        </TextBlock.Effect>
+                    </TextBlock>
+                </Viewbox>
                 
                 <TextBlock x:Name="LEDCityText" Grid.Row="1" Text="Local" FontSize="10" 
                            FontFamily="Consolas" Foreground="#66FF0000" 
