@@ -1,7 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Drawing;
-using System.Drawing.Drawing2D;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
@@ -37,38 +35,36 @@ namespace ChronoDesk.Infrastructure
 
             _notifyIcon = new Forms.NotifyIcon
             {
-                Icon = CreateRCIcon(), // تولید آیکون اختصاصی R و C
+                Icon = CreateRCIcon(),
                 Visible = true,
-                Text = "R00T CLOCK" // تغییر نام برنامه
+                Text = "R00T CLOCK"
             };
 
             BuildContextMenu();
             System.Windows.Application.Current.Exit += (s, e) => Shutdown();
         }
 
-        // موتور رسم آیکون R و C
-        private Icon CreateRCIcon()
+        private System.Drawing.Icon CreateRCIcon()
         {
-            using var bmp = new Bitmap(32, 32);
-            using var g = Graphics.FromImage(bmp);
-            g.SmoothingMode = SmoothingMode.AntiAlias;
+            // رفع تداخل: استفاده از نام دقیق System.Drawing
+            using var bmp = new System.Drawing.Bitmap(32, 32);
+            using var g = System.Drawing.Graphics.FromImage(bmp);
+            g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
             g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAliasGridFit;
             
-            // پس‌زمینه دایره‌ای تیره
-            using var bgBrush = new SolidBrush(Color.FromArgb(30, 30, 30));
+            using var bgBrush = new System.Drawing.SolidBrush(System.Drawing.Color.FromArgb(30, 30, 30));
             g.FillEllipse(bgBrush, 2, 2, 28, 28);
             
-            // رسم حرف R (آبی)
-            using var font = new Font("Arial", 12, FontStyle.Bold);
-            using var rBrush = new SolidBrush(Color.DeepSkyBlue);
+            // رفع تداخل Font و FontStyle
+            using var font = new System.Drawing.Font("Arial", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Pixel);
+            using var rBrush = new System.Drawing.SolidBrush(System.Drawing.Color.DeepSkyBlue);
             g.DrawString("R", font, rBrush, 3, 7);
             
-            // رسم حرف C (سفید)
-            using var cBrush = new SolidBrush(Color.White);
+            using var cBrush = new System.Drawing.SolidBrush(System.Drawing.Color.White);
             g.DrawString("C", font, cBrush, 15, 7);
 
             var handle = bmp.GetHicon();
-            return Icon.FromHandle(handle);
+            return System.Drawing.Icon.FromHandle(handle);
         }
 
         public List<MainWindow> GetActiveWindows() => _activeWindows;
@@ -171,7 +167,6 @@ namespace ChronoDesk.Infrastructure
                 using var key = Registry.CurrentUser.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Run", true);
                 if (key != null)
                 {
-                    // تغییر نام کلید رجیستری به R00TCLOCK
                     if (_settingsEngine.Settings.AutoStart) key.SetValue("R00TCLOCK", System.Windows.Application.ResourceAssembly.Location);
                     else key.DeleteValue("R00TCLOCK", false);
                 }
